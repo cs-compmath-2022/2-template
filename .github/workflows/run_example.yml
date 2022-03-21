@@ -1,0 +1,28 @@
+name: Run example
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        shell: bash
+        run: |
+          ./scripts/install_dependencies.sh
+      - name: Compress image
+        shell: bash
+        run: |
+          ./scripts/run.sh --mode=compress --method=numpy --compression=2 --in_file=./resources/example.bmp --out_file=./resources/compressed
+      - name: Compare sizes
+        shell: bash
+        run: |
+          expr "$(stat --printf=%s ./resources/example.bmp)" ">=" \( 2 "*"  "$(stat --printf=%s ./resources/compressed)" \)
+      - name: Restore image
+        shell: bash
+        run: |
+          ./scripts/run.sh --mode=decompress --in_file=./resources/compressed --out_file=./resources/restored.bmp
+
